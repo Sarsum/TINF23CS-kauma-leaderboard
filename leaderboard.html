@@ -571,7 +571,7 @@
             }
         });
 
-        window.addEventListener("DOMContentLoaded", () => {
+        function loadLeaderboard() {
             fetch("assets/leaderboard.json")
                 .then(r => r.json())
                 .then(data => {
@@ -588,8 +588,11 @@
                     console.error(err);
                     showError("Could not load leaderboard data.");
                 });
-        });
+        }
+        
+        window.addEventListener("DOMContentLoaded", loadLeaderboard);
 
+        setInterval(loadLeaderboard, 5 * 60 * 1000);  // reload every 5 min
 
         function showError(message) {
             errorBox.textContent = message;
