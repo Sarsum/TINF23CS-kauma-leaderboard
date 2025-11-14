@@ -842,13 +842,12 @@
         langTagsContainer.className = "lang-tags";
 
         (entry.loc_by_language || []).forEach(pair => {
-          const lang = pair?.[0];
-          const loc = pair?.[1];
-          if (!lang) return;
-          const tag = document.createElement("span");
-          tag.className = "lang-tag";
-          tag.textContent = loc != null ? `${lang} · ${loc} LOC` : lang;
-          langTagsContainer.appendChild(tag);
+            const lang = pair?.[0];
+            if (!lang) return;
+            const tag = document.createElement("span");
+            tag.className = "lang-tag";
+            tag.textContent = lang;
+            langTagsContainer.appendChild(tag);
         });
 
         tdLangs.appendChild(langTagsContainer);
