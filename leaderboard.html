@@ -452,20 +452,15 @@
   <header>
     <h1>
       Leaderboard Viewer
-      <span class="badge">Local JSON</span>
+      <span class="badge">kartfire</span>
     </h1>
     <p class="subtitle">
-      Load your exported leaderboard JSON and explore each collection with per-language filtering.
+        Showing kartfire leaderboard export.
     </p>
   </header>
 
   <main>
     <section class="top-bar">
-      <div class="file-input-group">
-        <span class="file-label">Leaderboard JSON</span>
-        <input type="file" id="jsonFile" accept=".json,application/json" />
-      </div>
-
       <div class="meta-info">
         <span class="pill" id="exportTsPill" style="display:none;">
           Exported: <strong id="exportTsValue"></strong>
@@ -519,7 +514,6 @@
     let activeLanguages = new Set();
     let currentCollectionIndex = 0;
 
-    const fileInput = document.getElementById("jsonFile");
     const filtersSection = document.getElementById("filtersSection");
     const languageFilters = document.getElementById("languageFilters");
     const collectionsShell = document.getElementById("collectionsShell");
@@ -567,33 +561,25 @@
       }
     });
 
-    fileInput.addEventListener("change", handleFileSelection);
+    window.addEventListener("DOMContentLoaded", () => {
+        fetch("assets/leaderboard.json")
+            .then(r => r.json())
+            .then(data => {
+                leaderboardData = data;
+                errorBox.style.display = "none";
+                currentCollectionIndex = 0;
 
-    function handleFileSelection(event) {
-      const file = event.target.files[0];
-      if (!file) return;
+                prepareMetaInfo(data);
+                prepareLanguages(data);
+                renderLanguageFilters();
+                renderCollections();
+            })
+            .catch(err => {
+                console.error(err);
+                showError("Could not load leaderboard data.");
+            });
+    });
 
-      const reader = new FileReader();
-      reader.onload = () => {
-        try {
-          const json = JSON.parse(reader.result);
-          errorBox.style.display = "none";
-          leaderboardData = json;
-          currentCollectionIndex = 0;
-          prepareMetaInfo(json);
-          prepareLanguages(json);
-          renderLanguageFilters();
-          renderCollections();
-        } catch (e) {
-          console.error(e);
-          showError("Could not parse JSON. Please make sure this is a valid leaderboard export.");
-        }
-      };
-      reader.onerror = () => {
-        showError("Failed to read file. Please try again.");
-      };
-      reader.readAsText(file);
-    }
 
     function showError(message) {
       errorBox.textContent = message;
