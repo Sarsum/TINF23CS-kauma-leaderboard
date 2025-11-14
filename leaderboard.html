@@ -1,908 +1,968 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8" />
-  <title>Leaderboard Viewer</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    :root {
-      --bg: #020617;
-      --bg-elevated: #020617;
-      --card-bg: #020617;
-      --card-border: #1f2937;
-      --accent: #38bdf8;
-      --accent-soft: rgba(56,189,248,0.15);
-      --text-main: #e5e7eb;
-      --text-muted: #9ca3af;
-      --danger: #f97373;
-      --radius-lg: 16px;
-      --radius-pill: 999px;
-    }
+    <meta charset="UTF-8" />
+    <title>Leaderboard Viewer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+        :root {
+            --bg: #020617;
+            --bg-elevated: #020617;
+            --card-bg: #020617;
+            --card-border: #1f2937;
+            --accent: #38bdf8;
+            --accent-soft: rgba(56, 189, 248, 0.15);
+            --text-main: #e5e7eb;
+            --text-muted: #9ca3af;
+            --danger: #f97373;
+            --radius-lg: 16px;
+            --radius-pill: 999px;
+        }
 
-    * {
-      box-sizing: border-box;
-    }
+        * {
+            box-sizing: border-box;
+        }
 
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: radial-gradient(circle at top, #0b1120 0, #020617 50%, #000 100%);
-      color: var(--text-main);
-      min-height: 100vh;
-    }
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: radial-gradient(circle at top, #0b1120 0, #020617 50%, #000 100%);
+            color: var(--text-main);
+            min-height: 100vh;
+        }
 
-    header {
-      padding: 1.5rem 1.5rem 0.5rem;
-    }
+        header {
+            padding: 1.5rem 1.5rem 0.5rem;
+        }
 
-    header h1 {
-      margin: 0 0 0.25rem;
-      font-size: 1.5rem;
-      letter-spacing: 0.03em;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
+        header h1 {
+            margin: 0 0 0.25rem;
+            font-size: 1.5rem;
+            letter-spacing: 0.03em;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
 
-    header h1 span.badge {
-      font-size: 0.75rem;
-      padding: 0.1rem 0.6rem;
-      border-radius: var(--radius-pill);
-      border: 1px solid var(--accent-soft);
-      background: rgba(15,23,42,0.9);
-      color: var(--accent);
-      text-transform: uppercase;
-    }
+        header h1 span.badge {
+            font-size: 0.75rem;
+            padding: 0.1rem 0.6rem;
+            border-radius: var(--radius-pill);
+            border: 1px solid var(--accent-soft);
+            background: rgba(15, 23, 42, 0.9);
+            color: var(--accent);
+            text-transform: uppercase;
+        }
 
-    header p.subtitle {
-      margin: 0;
-      font-size: 0.9rem;
-      color: var(--text-muted);
-    }
+        header p.subtitle {
+            margin: 0;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
 
-    main {
-      padding: 0.5rem 1.5rem 2rem;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
+        main {
+            padding: 0.5rem 1.5rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
 
-    .top-bar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-      align-items: center;
-      margin: 1rem 0 1.25rem;
-      padding: 0.75rem 1rem;
-      border-radius: var(--radius-lg);
-      background: rgba(15,23,42,0.9);
-      border: 1px solid rgba(31,41,55,0.8);
-      backdrop-filter: blur(18px);
-    }
+        .top-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+            margin: 1rem 0 1.25rem;
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-lg);
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid rgba(31, 41, 55, 0.8);
+            backdrop-filter: blur(18px);
+        }
 
-    .file-input-group {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-    }
+        .file-input-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
 
-    .file-label {
-      font-size: 0.85rem;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--text-muted);
-    }
+        .file-label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+        }
 
-    input[type="file"] {
-      font-size: 0.85rem;
-      color: var(--text-main);
-      max-width: 220px;
-    }
+        input[type="file"] {
+            font-size: 0.85rem;
+            color: var(--text-main);
+            max-width: 220px;
+        }
 
-    .meta-info {
-      margin-left: auto;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.75rem;
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      align-items: center;
-    }
+        .meta-info {
+            margin-left: auto;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            align-items: center;
+        }
 
-    .pill {
-      padding: 0.2rem 0.7rem;
-      border-radius: var(--radius-pill);
-      border: 1px solid rgba(31,41,55,0.9);
-      background: rgba(15,23,42,0.9);
-    }
+        .pill {
+            padding: 0.2rem 0.7rem;
+            border-radius: var(--radius-pill);
+            border: 1px solid rgba(31, 41, 55, 0.9);
+            background: rgba(15, 23, 42, 0.9);
+        }
 
-    .pill strong {
-      color: var(--text-main);
-      font-weight: 500;
-    }
+        .pill strong {
+            color: var(--text-main);
+            font-weight: 500;
+        }
 
-    .filters {
-      margin-bottom: 1.25rem;
-      padding: 0.75rem 1rem;
-      border-radius: var(--radius-lg);
-      background: rgba(15,23,42,0.9);
-      border: 1px solid rgba(31,41,55,0.8);
-    }
+        .filters {
+            margin-bottom: 1.25rem;
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-lg);
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid rgba(31, 41, 55, 0.8);
+        }
 
-    .filters-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      gap: 0.5rem;
-      margin-bottom: 0.5rem;
-    }
+        .filters-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
 
-    .filters-header span.title {
-      font-size: 0.85rem;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--text-muted);
-    }
+        .filters-header span.title {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+        }
 
-    .filters-header button {
-      border-radius: var(--radius-pill);
-      border: 1px solid rgba(148,163,184,0.5);
-      background: transparent;
-      color: var(--text-muted);
-      font-size: 0.8rem;
-      padding: 0.15rem 0.7rem;
-      cursor: pointer;
-    }
+        .filters-header button {
+            border-radius: var(--radius-pill);
+            border: 1px solid rgba(148, 163, 184, 0.5);
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            padding: 0.15rem 0.7rem;
+            cursor: pointer;
+        }
 
-    .filters-header button:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-    }
+        .filters-header button:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
 
-    .language-chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.4rem;
-    }
+        .language-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+        }
 
-    .language-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-      padding: 0.2rem 0.65rem;
-      border-radius: var(--radius-pill);
-      border: 1px solid rgba(31,41,55,0.9);
-      background: rgba(15,23,42,0.9);
-      cursor: pointer;
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      user-select: none;
-    }
+        .language-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.2rem 0.65rem;
+            border-radius: var(--radius-pill);
+            border: 1px solid rgba(31, 41, 55, 0.9);
+            background: rgba(15, 23, 42, 0.9);
+            cursor: pointer;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            user-select: none;
+        }
 
-    .language-chip input {
-      accent-color: var(--accent);
-    }
+        .language-chip input {
+            accent-color: var(--accent);
+        }
 
-    .language-chip.active {
-      border-color: var(--accent);
-      background: var(--accent-soft);
-      color: var(--accent);
-    }
+        .language-chip.active {
+            border-color: var(--accent);
+            background: var(--accent-soft);
+            color: var(--accent);
+        }
 
-    .language-chip span.lang {
-      font-weight: 500;
-    }
+        .language-chip span.lang {
+            font-weight: 500;
+        }
 
-    /* Collection pager / tabs */
+        /* Collection pager / tabs */
 
-    .collections-wrapper {
-      border-radius: var(--radius-lg);
-      background: rgba(15,23,42,0.9);
-      border: 1px solid rgba(31,41,55,0.9);
-      padding: 0.6rem 0.7rem 0.8rem;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
-    }
+        .collections-wrapper {
+            border-radius: var(--radius-lg);
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid rgba(31, 41, 55, 0.9);
+            padding: 0.6rem 0.7rem 0.8rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+        }
 
-    .collections-top {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin-bottom: 0.5rem;
-    }
+        .collections-top {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
 
-    .tabs-bar {
-    display: flex;
-    flex-wrap: wrap;          /* allow multiple rows */
-    gap: 0.4rem;
-    flex: 1 1 auto;
-    overflow-x: visible;      /* no horizontal scroll */
-    max-height: none;         /* let it grow as needed */
-    padding-bottom: 0.1rem;
-    }
+        .tabs-bar {
+            display: flex;
+            flex-wrap: wrap;
+            /* allow multiple rows */
+            gap: 0.4rem;
+            flex: 1 1 auto;
+            overflow-x: visible;
+            /* no horizontal scroll */
+            max-height: none;
+            /* let it grow as needed */
+            padding-bottom: 0.1rem;
+        }
 
 
-    .tab {
-      flex: 0 0 auto;
-      padding: 0.25rem 0.7rem;
-      border-radius: var(--radius-pill);
-      border: 1px solid rgba(31,41,55,0.9);
-      background: rgba(15,23,42,0.9);
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      cursor: pointer;
-      white-space: nowrap;
-      max-width: 200px;
-      text-overflow: ellipsis;
-      overflow: hidden;
-    }
+        .tab {
+            flex: 0 0 auto;
+            padding: 0.25rem 0.7rem;
+            border-radius: var(--radius-pill);
+            border: 1px solid rgba(31, 41, 55, 0.9);
+            background: rgba(15, 23, 42, 0.9);
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            white-space: nowrap;
+            max-width: 200px;
+            text-overflow: ellipsis;
+            overflow: hidden;
+        }
 
-    .tab.active {
-      border-color: var(--accent);
-      background: var(--accent-soft);
-      color: var(--accent);
-    }
+        .tab.active {
+            border-color: var(--accent);
+            background: var(--accent-soft);
+            color: var(--accent);
+        }
 
-    .pager {
-      display: flex;
-      gap: 0.25rem;
-      flex: 0 0 auto;
-      align-items: center;
-    }
+        .pager {
+            display: flex;
+            gap: 0.25rem;
+            flex: 0 0 auto;
+            align-items: center;
+        }
 
-    .pager button {
-      border-radius: var(--radius-pill);
-      border: 1px solid rgba(148,163,184,0.6);
-      background: transparent;
-      color: var(--text-muted);
-      font-size: 0.8rem;
-      padding: 0.15rem 0.6rem;
-      cursor: pointer;
-      min-width: 2.1rem;
-    }
+        .pager button {
+            border-radius: var(--radius-pill);
+            border: 1px solid rgba(148, 163, 184, 0.6);
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            padding: 0.15rem 0.6rem;
+            cursor: pointer;
+            min-width: 2.1rem;
+        }
 
-    .pager button:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-    }
+        .pager button:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
 
-    .pager button:disabled {
-      opacity: 0.35;
-      cursor: default;
-    }
+        .pager button:disabled {
+            opacity: 0.35;
+            cursor: default;
+        }
 
-    .pager span {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      padding: 0 0.2rem;
-    }
+        .pager span {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            padding: 0 0.2rem;
+        }
 
-    .collections {
-      margin-top: 0.5rem;
-    }
+        .collections {
+            margin-top: 0.5rem;
+        }
 
-    .collection-card {
-      border-radius: var(--radius-lg);
-      background: rgba(15,23,42,0.95);
-      border: 1px solid rgba(31,41,55,0.9);
-      padding: 0.9rem 1rem 0.8rem;
-      overflow: hidden;
-    }
+        .collection-card {
+            border-radius: var(--radius-lg);
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid rgba(31, 41, 55, 0.9);
+            padding: 0.9rem 1rem 0.8rem;
+            overflow: hidden;
+        }
 
-    .collection-header {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: 0.5rem;
-      margin-bottom: 0.6rem;
-    }
+        .collection-header {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 0.5rem;
+            margin-bottom: 0.6rem;
+        }
 
-    .collection-title {
-      font-size: 1rem;
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-    }
+        .collection-title {
+            font-size: 1rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
 
-    .collection-title code {
-      font-size: 0.85rem;
-      background: rgba(15,23,42,0.8);
-      border-radius: var(--radius-pill);
-      padding: 0.1rem 0.5rem;
-      border: 1px solid rgba(31,41,55,0.9);
-      color: var(--accent);
-    }
+        .collection-title code {
+            font-size: 0.85rem;
+            background: rgba(15, 23, 42, 0.8);
+            border-radius: var(--radius-pill);
+            padding: 0.1rem 0.5rem;
+            border: 1px solid rgba(31, 41, 55, 0.9);
+            color: var(--accent);
+        }
 
-    .collection-meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.4rem;
-      font-size: 0.78rem;
-      color: var(--text-muted);
-    }
+        .collection-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
 
-    .collection-meta span {
-      padding: 0.15rem 0.5rem;
-      border-radius: var(--radius-pill);
-      border: 1px solid rgba(31,41,55,0.9);
-      background: rgba(15,23,42,0.9);
-    }
+        .collection-meta span {
+            padding: 0.15rem 0.5rem;
+            border-radius: var(--radius-pill);
+            border: 1px solid rgba(31, 41, 55, 0.9);
+            background: rgba(15, 23, 42, 0.9);
+        }
 
-    .table-wrapper {
-      width: 100%;
-      overflow-x: auto;
-      border-radius: 0.75rem;
-      border: 1px solid rgba(31,41,55,0.8);
-      background: radial-gradient(circle at top left, rgba(56,189,248,0.08), transparent 55%);
-    }
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            border-radius: 0.75rem;
+            border: 1px solid rgba(31, 41, 55, 0.8);
+            background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.08), transparent 55%);
+        }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.83rem;
-      min-width: 600px;
-    }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.83rem;
+            min-width: 600px;
+        }
 
-    thead {
-      background: rgba(15,23,42,0.97);
-    }
+        thead {
+            background: rgba(15, 23, 42, 0.97);
+        }
 
-    thead th {
-      text-align: left;
-      padding: 0.55rem 0.7rem;
-      white-space: nowrap;
-      color: var(--text-muted);
-      font-weight: 500;
-      border-bottom: 1px solid rgba(31,41,55,0.9);
-    }
+        thead th {
+            text-align: left;
+            padding: 0.55rem 0.7rem;
+            white-space: nowrap;
+            color: var(--text-muted);
+            font-weight: 500;
+            border-bottom: 1px solid rgba(31, 41, 55, 0.9);
+        }
 
-    tbody tr:nth-child(even) {
-      background: rgba(15,23,42,0.9);
-    }
+        tbody tr:nth-child(even) {
+            background: rgba(15, 23, 42, 0.9);
+        }
 
-    tbody tr:nth-child(odd) {
-      background: rgba(15,23,42,0.95);
-    }
+        tbody tr:nth-child(odd) {
+            background: rgba(15, 23, 42, 0.95);
+        }
 
-    tbody td {
-      padding: 0.45rem 0.7rem;
-      border-bottom: 1px solid rgba(31,41,55,0.6);
-      vertical-align: middle;
-    }
+        tbody td {
+            padding: 0.45rem 0.7rem;
+            border-bottom: 1px solid rgba(31, 41, 55, 0.6);
+            vertical-align: middle;
+        }
 
-    td.rank {
-      font-variant-numeric: tabular-nums;
-      color: var(--text-muted);
-      width: 3rem;
-    }
+        td.rank {
+            font-variant-numeric: tabular-nums;
+            color: var(--text-muted);
+            width: 3rem;
+        }
 
-    td.name {
-      font-weight: 500;
-    }
+        td.name {
+            font-weight: 500;
+        }
 
-    td.name span.source {
-      color: var(--text-muted);
-      font-size: 0.75rem;
-      margin-left: 0.35rem;
-    }
+        td.name span.source {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            margin-left: 0.35rem;
+        }
 
-    td.runtime {
-      font-variant-numeric: tabular-nums;
-    }
+        td.runtime {
+            font-variant-numeric: tabular-nums;
+        }
 
-    td.runtime span.badge {
-      font-size: 0.7rem;
-      padding: 0.1rem 0.4rem;
-      border-radius: var(--radius-pill);
-      border: 1px solid rgba(31,41,55,0.9);
-      color: var(--text-muted);
-      margin-left: 0.35rem;
-    }
+        td.runtime span.badge {
+            font-size: 0.7rem;
+            padding: 0.1rem 0.4rem;
+            border-radius: var(--radius-pill);
+            border: 1px solid rgba(31, 41, 55, 0.9);
+            color: var(--text-muted);
+            margin-left: 0.35rem;
+        }
 
-    .lang-tags {
-      display: inline-flex;
-      flex-wrap: wrap;
-      gap: 0.25rem;
-    }
+        .lang-tags {
+            display: inline-flex;
+            flex-wrap: wrap;
+            gap: 0.25rem;
+        }
 
-    .lang-tag {
-      padding: 0.1rem 0.45rem;
-      border-radius: var(--radius-pill);
-      border: 1px solid rgba(31,41,55,0.9);
-      font-size: 0.72rem;
-      white-space: nowrap;
-    }
+        .lang-tag {
+            padding: 0.1rem 0.45rem;
+            border-radius: var(--radius-pill);
+            border: 1px solid rgba(31, 41, 55, 0.9);
+            font-size: 0.72rem;
+            white-space: nowrap;
+        }
 
-    .no-data {
-      padding: 0.75rem 0.25rem 0.25rem;
-      font-size: 0.85rem;
-      color: var(--text-muted);
-    }
+        .no-data {
+            padding: 0.75rem 0.25rem 0.25rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
 
-    .error {
-      margin-top: 0.5rem;
-      color: var(--danger);
-      font-size: 0.8rem;
-    }
+        .error {
+            margin-top: 0.5rem;
+            color: var(--danger);
+            font-size: 0.8rem;
+        }
 
-    @media (max-width: 768px) {
-      header {
-        padding: 1.2rem 1rem 0.3rem;
-      }
-      main {
-        padding: 0.3rem 1rem 1.6rem;
-      }
-      .top-bar {
-        padding: 0.7rem 0.75rem;
-      }
-      .meta-info {
-        margin-left: 0;
-      }
-      .collections-wrapper {
-        padding: 0.45rem 0.5rem 0.7rem;
-      }
-      .collection-card {
-        padding: 0.7rem 0.7rem 0.6rem;
-      }
-    }
-  </style>
+        @media (max-width: 768px) {
+            header {
+                padding: 1.2rem 1rem 0.3rem;
+            }
+
+            main {
+                padding: 0.3rem 1rem 1.6rem;
+            }
+
+            .top-bar {
+                padding: 0.7rem 0.75rem;
+            }
+
+            .meta-info {
+                margin-left: 0;
+            }
+
+            .collections-wrapper {
+                padding: 0.45rem 0.5rem 0.7rem;
+            }
+
+            .collection-card {
+                padding: 0.7rem 0.7rem 0.6rem;
+            }
+        }
+    </style>
 </head>
+
 <body>
-  <header>
-    <h1>
-      Leaderboard Viewer
-      <span class="badge">kartfire</span>
-    </h1>
-    <p class="subtitle">
-        Showing kartfire leaderboard export.
-    </p>
-  </header>
+    <header>
+        <h1>
+            Leaderboard Viewer
+            <span class="badge">kartfire</span>
+        </h1>
+        <p class="subtitle">
+            Showing kartfire leaderboard export.
+        </p>
+    </header>
 
-  <main>
-    <section class="top-bar">
-      <div class="meta-info">
-        <span class="pill" id="exportTsPill" style="display:none;">
-          Exported: <strong id="exportTsValue"></strong>
-        </span>
-        <span class="pill" id="collectionsCountPill" style="display:none;">
-          Collections: <strong id="collectionsCountValue"></strong>
-        </span>
-        <span class="pill" id="entriesCountPill" style="display:none;">
-          Entries: <strong id="entriesCountValue"></strong>
-        </span>
-      </div>
-    </section>
-
-    <section class="filters" id="filtersSection" style="display:none;">
-      <div class="filters-header">
-        <span class="title">Languages</span>
-        <div>
-          <button type="button" id="btnAll">Select all</button>
-          <button type="button" id="btnNone">Clear</button>
-        </div>
-      </div>
-      <div class="language-chips" id="languageFilters"></div>
-    </section>
-
-    <div id="errorBox" class="error" style="display:none;"></div>
-
-    <section class="collections" id="collectionsRoot">
-      <div class="no-data" id="placeholder">
-        Load a leaderboard JSON file to see collections and entries.
-      </div>
-
-      <div id="collectionsShell" style="display:none;">
-        <div class="collections-wrapper">
-          <div class="collections-top">
-            <div class="tabs-bar" id="collectionsTabs"></div>
-            <div class="pager">
-              <button type="button" id="btnPrev">&lt;</button>
-              <span id="pagerInfo">0 / 0</span>
-              <button type="button" id="btnNext">&gt;</button>
+    <main>
+        <section class="top-bar">
+            <div class="meta-info">
+                <span class="pill" id="exportTsPill" style="display:none;">
+                    Exported: <strong id="exportTsValue"></strong>
+                </span>
+                <span class="pill" id="collectionsCountPill" style="display:none;">
+                    Collections: <strong id="collectionsCountValue"></strong>
+                </span>
+                <span class="pill" id="entriesCountPill" style="display:none;">
+                    Entries: <strong id="entriesCountValue"></strong>
+                </span>
             </div>
-          </div>
-          <div id="collectionsContainer"></div>
-        </div>
-      </div>
-    </section>
-  </main>
+        </section>
 
-  <script>
-    let leaderboardData = null;
-    let allLanguages = new Set();
-    let activeLanguages = new Set();
-    let currentCollectionIndex = 0;
+        <section class="filters" id="filtersSection" style="display:none;">
+            <div class="filters-header">
+                <span class="title">Languages</span>
+                <div>
+                    <button type="button" id="btnAll">Select all</button>
+                    <button type="button" id="btnNone">Clear</button>
+                </div>
+            </div>
+            <div class="language-chips" id="languageFilters"></div>
+        </section>
 
-    const filtersSection = document.getElementById("filtersSection");
-    const languageFilters = document.getElementById("languageFilters");
-    const collectionsShell = document.getElementById("collectionsShell");
-    const collectionsContainer = document.getElementById("collectionsContainer");
-    const placeholder = document.getElementById("placeholder");
-    const errorBox = document.getElementById("errorBox");
+        <div id="errorBox" class="error" style="display:none;"></div>
 
-    const collectionsTabs = document.getElementById("collectionsTabs");
-    const btnPrev = document.getElementById("btnPrev");
-    const btnNext = document.getElementById("btnNext");
-    const pagerInfo = document.getElementById("pagerInfo");
+        <section class="collections" id="collectionsRoot">
+            <div class="no-data" id="placeholder">
+                Load a leaderboard JSON file to see collections and entries.
+            </div>
 
-    const exportTsPill = document.getElementById("exportTsPill");
-    const exportTsValue = document.getElementById("exportTsValue");
-    const collectionsCountPill = document.getElementById("collectionsCountPill");
-    const collectionsCountValue = document.getElementById("collectionsCountValue");
-    const entriesCountPill = document.getElementById("entriesCountPill");
-    const entriesCountValue = document.getElementById("entriesCountValue");
+            <div id="collectionsShell" style="display:none;">
+                <div class="collections-wrapper">
+                    <div class="collections-top">
+                        <div class="tabs-bar" id="collectionsTabs"></div>
+                        <div class="pager">
+                            <button type="button" id="btnPrev">&lt;</button>
+                            <span id="pagerInfo">0 / 0</span>
+                            <button type="button" id="btnNext">&gt;</button>
+                        </div>
+                    </div>
+                    <div id="collectionsContainer"></div>
+                </div>
+            </div>
+        </section>
+    </main>
 
-    document.getElementById("btnAll").addEventListener("click", () => {
-      activeLanguages = new Set(allLanguages);
-      updateLanguageFilterUI();
-      renderCollections();
-    });
+    <script>
+        let leaderboardData = null;
+        let allLanguages = new Set();
+        let activeLanguages = new Set();
+        let currentCollectionIndex = 0;
 
-    document.getElementById("btnNone").addEventListener("click", () => {
-      activeLanguages = new Set();
-      updateLanguageFilterUI();
-      renderCollections();
-    });
+        const filtersSection = document.getElementById("filtersSection");
+        const languageFilters = document.getElementById("languageFilters");
+        const collectionsShell = document.getElementById("collectionsShell");
+        const collectionsContainer = document.getElementById("collectionsContainer");
+        const placeholder = document.getElementById("placeholder");
+        const errorBox = document.getElementById("errorBox");
 
-    btnPrev.addEventListener("click", () => {
-      if (!leaderboardData || !Array.isArray(leaderboardData.leaderboards)) return;
-      if (currentCollectionIndex > 0) {
-        currentCollectionIndex -= 1;
-        renderCollections();
-      }
-    });
+        const collectionsTabs = document.getElementById("collectionsTabs");
+        const btnPrev = document.getElementById("btnPrev");
+        const btnNext = document.getElementById("btnNext");
+        const pagerInfo = document.getElementById("pagerInfo");
 
-    btnNext.addEventListener("click", () => {
-      if (!leaderboardData || !Array.isArray(leaderboardData.leaderboards)) return;
-      if (currentCollectionIndex < leaderboardData.leaderboards.length - 1) {
-        currentCollectionIndex += 1;
-        renderCollections();
-      }
-    });
+        const exportTsPill = document.getElementById("exportTsPill");
+        const exportTsValue = document.getElementById("exportTsValue");
+        const collectionsCountPill = document.getElementById("collectionsCountPill");
+        const collectionsCountValue = document.getElementById("collectionsCountValue");
+        const entriesCountPill = document.getElementById("entriesCountPill");
+        const entriesCountValue = document.getElementById("entriesCountValue");
 
-    window.addEventListener("DOMContentLoaded", () => {
-        fetch("assets/leaderboard.json")
-            .then(r => r.json())
-            .then(data => {
-                leaderboardData = data;
-                errorBox.style.display = "none";
-                currentCollectionIndex = 0;
+        document.getElementById("btnAll").addEventListener("click", () => {
+            activeLanguages = new Set(allLanguages);
+            updateLanguageFilterUI();
+            renderCollections();
+        });
 
-                prepareMetaInfo(data);
-                prepareLanguages(data);
-                renderLanguageFilters();
+        document.getElementById("btnNone").addEventListener("click", () => {
+            activeLanguages = new Set();
+            updateLanguageFilterUI();
+            renderCollections();
+        });
+
+        btnPrev.addEventListener("click", () => {
+            if (!leaderboardData || !Array.isArray(leaderboardData.leaderboards)) return;
+            if (currentCollectionIndex > 0) {
+                currentCollectionIndex -= 1;
                 renderCollections();
-            })
-            .catch(err => {
-                console.error(err);
-                showError("Could not load leaderboard data.");
+            }
+        });
+
+        btnNext.addEventListener("click", () => {
+            if (!leaderboardData || !Array.isArray(leaderboardData.leaderboards)) return;
+            if (currentCollectionIndex < leaderboardData.leaderboards.length - 1) {
+                currentCollectionIndex += 1;
+                renderCollections();
+            }
+        });
+
+        window.addEventListener("DOMContentLoaded", () => {
+            fetch("assets/leaderboard.json")
+                .then(r => r.json())
+                .then(data => {
+                    leaderboardData = data;
+                    errorBox.style.display = "none";
+                    currentCollectionIndex = 0;
+
+                    prepareMetaInfo(data);
+                    prepareLanguages(data);
+                    renderLanguageFilters();
+                    renderCollections();
+                })
+                .catch(err => {
+                    console.error(err);
+                    showError("Could not load leaderboard data.");
+                });
+        });
+
+
+        function showError(message) {
+            errorBox.textContent = message;
+            errorBox.style.display = "block";
+        }
+
+        function prepareMetaInfo(data) {
+            if (data.export_ts) {
+                exportTsValue.textContent = formatTimestamp(data.export_ts);
+                exportTsPill.style.display = "inline-flex";
+            } else {
+                exportTsPill.style.display = "none";
+            }
+
+            if (Array.isArray(data.leaderboards)) {
+                const count = data.leaderboards.length;
+                collectionsCountValue.textContent = count;
+                collectionsCountPill.style.display = "inline-flex";
+
+                const totalEntries = data.leaderboards.reduce(
+                    (sum, lb) => sum + (Array.isArray(lb.entries) ? lb.entries.length : 0),
+                    0
+                );
+                entriesCountValue.textContent = totalEntries;
+                entriesCountPill.style.display = "inline-flex";
+            } else {
+                collectionsCountPill.style.display = "none";
+                entriesCountPill.style.display = "none";
+            }
+        }
+
+        function formatTimestamp(ts) {
+            try {
+                const d = new Date(ts);
+                if (isNaN(d.getTime())) return ts;
+                return d.toLocaleString();
+            } catch {
+                return ts;
+            }
+        }
+
+        function prepareLanguages(data) {
+            allLanguages = new Set();
+            if (!Array.isArray(data.leaderboards)) return;
+
+            data.leaderboards.forEach(lb => {
+                if (!Array.isArray(lb.entries)) return;
+                lb.entries.forEach(entry => {
+                    if (!Array.isArray(entry.loc_by_language)) return;
+                    entry.loc_by_language.forEach(pair => {
+                        const lang = pair && pair[0];
+                        if (lang) {
+                            allLanguages.add(lang);
+                        }
+                    });
+                });
             });
-    });
 
+            activeLanguages = new Set(allLanguages);
+        }
 
-    function showError(message) {
-      errorBox.textContent = message;
-      errorBox.style.display = "block";
-    }
-
-    function prepareMetaInfo(data) {
-      if (data.export_ts) {
-        exportTsValue.textContent = formatTimestamp(data.export_ts);
-        exportTsPill.style.display = "inline-flex";
-      } else {
-        exportTsPill.style.display = "none";
-      }
-
-      if (Array.isArray(data.leaderboards)) {
-        const count = data.leaderboards.length;
-        collectionsCountValue.textContent = count;
-        collectionsCountPill.style.display = "inline-flex";
-
-        const totalEntries = data.leaderboards.reduce(
-          (sum, lb) => sum + (Array.isArray(lb.entries) ? lb.entries.length : 0),
-          0
-        );
-        entriesCountValue.textContent = totalEntries;
-        entriesCountPill.style.display = "inline-flex";
-      } else {
-        collectionsCountPill.style.display = "none";
-        entriesCountPill.style.display = "none";
-      }
-    }
-
-    function formatTimestamp(ts) {
-      try {
-        const d = new Date(ts);
-        if (isNaN(d.getTime())) return ts;
-        return d.toLocaleString();
-      } catch {
-        return ts;
-      }
-    }
-
-    function prepareLanguages(data) {
-      allLanguages = new Set();
-      if (!Array.isArray(data.leaderboards)) return;
-
-      data.leaderboards.forEach(lb => {
-        if (!Array.isArray(lb.entries)) return;
-        lb.entries.forEach(entry => {
-          if (!Array.isArray(entry.loc_by_language)) return;
-          entry.loc_by_language.forEach(pair => {
-            const lang = pair && pair[0];
-            if (lang) {
-              allLanguages.add(lang);
+        function renderLanguageFilters() {
+            languageFilters.innerHTML = "";
+            if (!allLanguages.size) {
+                filtersSection.style.display = "none";
+                return;
             }
-          });
-        });
-      });
 
-      activeLanguages = new Set(allLanguages);
-    }
+            filtersSection.style.display = "block";
 
-    function renderLanguageFilters() {
-      languageFilters.innerHTML = "";
-      if (!allLanguages.size) {
-        filtersSection.style.display = "none";
-        return;
-      }
+            Array.from(allLanguages).sort().forEach(lang => {
+                const id = "lang_" + lang.replace(/\W+/g, "_");
 
-      filtersSection.style.display = "block";
+                const label = document.createElement("label");
+                label.className = "language-chip" + (activeLanguages.has(lang) ? " active" : "");
+                label.setAttribute("for", id);
 
-      Array.from(allLanguages).sort().forEach(lang => {
-        const id = "lang_" + lang.replace(/\W+/g, "_");
+                const checkbox = document.createElement("input");
+                checkbox.type = "checkbox";
+                checkbox.id = id;
+                checkbox.value = lang;
+                checkbox.checked = activeLanguages.has(lang);
+                checkbox.addEventListener("change", onLanguageToggle);
 
-        const label = document.createElement("label");
-        label.className = "language-chip" + (activeLanguages.has(lang) ? " active" : "");
-        label.setAttribute("for", id);
+                const spanLang = document.createElement("span");
+                spanLang.className = "lang";
+                spanLang.textContent = lang;
 
-        const checkbox = document.createElement("input");
-        checkbox.type = "checkbox";
-        checkbox.id = id;
-        checkbox.value = lang;
-        checkbox.checked = activeLanguages.has(lang);
-        checkbox.addEventListener("change", onLanguageToggle);
+                label.appendChild(checkbox);
+                label.appendChild(spanLang);
 
-        const spanLang = document.createElement("span");
-        spanLang.className = "lang";
-        spanLang.textContent = lang;
-
-        label.appendChild(checkbox);
-        label.appendChild(spanLang);
-
-        languageFilters.appendChild(label);
-      });
-    }
-
-    function updateLanguageFilterUI() {
-      const chips = languageFilters.querySelectorAll(".language-chip");
-      chips.forEach(chip => {
-        const input = chip.querySelector("input[type='checkbox']");
-        const lang = input.value;
-        input.checked = activeLanguages.has(lang);
-        if (activeLanguages.has(lang)) {
-          chip.classList.add("active");
-        } else {
-          chip.classList.remove("active");
-        }
-      });
-    }
-
-    function onLanguageToggle(event) {
-      const lang = event.target.value;
-      if (event.target.checked) {
-        activeLanguages.add(lang);
-      } else {
-        activeLanguages.delete(lang);
-      }
-      updateLanguageFilterUI();
-      renderCollections();
-    }
-
-    function renderCollections() {
-      collectionsContainer.innerHTML = "";
-      collectionsTabs.innerHTML = "";
-
-      if (!leaderboardData || !Array.isArray(leaderboardData.leaderboards) || !leaderboardData.leaderboards.length) {
-        placeholder.style.display = "block";
-        collectionsShell.style.display = "none";
-        return;
-      }
-
-      placeholder.style.display = "none";
-      collectionsShell.style.display = "block";
-
-      const leaderboards = leaderboardData.leaderboards;
-      const total = leaderboards.length;
-
-      // Ensure index bounds
-      if (currentCollectionIndex < 0) currentCollectionIndex = 0;
-      if (currentCollectionIndex >= total) currentCollectionIndex = total - 1;
-
-      // Tabs
-      leaderboards.forEach((lb, idx) => {
-        const tab = document.createElement("button");
-        tab.type = "button";
-        tab.className = "tab" + (idx === currentCollectionIndex ? " active" : "");
-        tab.textContent = lb.collection?.name || `Collection ${idx + 1}`;
-        tab.title = tab.textContent;
-        tab.addEventListener("click", () => {
-          currentCollectionIndex = idx;
-          renderCollections();
-        });
-        collectionsTabs.appendChild(tab);
-      });
-
-      // Pager
-      pagerInfo.textContent = (currentCollectionIndex + 1) + " / " + total;
-      btnPrev.disabled = currentCollectionIndex === 0;
-      btnNext.disabled = currentCollectionIndex === total - 1;
-
-      // Active collection card
-      const lb = leaderboards[currentCollectionIndex];
-      const card = buildCollectionCard(lb);
-      collectionsContainer.appendChild(card);
-    }
-
-    function buildCollectionCard(lb) {
-      const card = document.createElement("section");
-      card.className = "collection-card";
-
-      const header = document.createElement("div");
-      header.className = "collection-header";
-
-      const title = document.createElement("div");
-      title.className = "collection-title";
-      const nameSpan = document.createElement("span");
-      nameSpan.textContent = lb.collection?.name || "Unnamed collection";
-      const codeTag = document.createElement("code");
-      codeTag.textContent = lb.collection?.name || "collection";
-      title.appendChild(nameSpan);
-      title.appendChild(codeTag);
-
-      const meta = document.createElement("div");
-      meta.className = "collection-meta";
-      if (lb.collection?.length != null) {
-        const spanLen = document.createElement("span");
-        spanLen.textContent = "Cases: " + lb.collection.length;
-        meta.appendChild(spanLen);
-      }
-      if (lb.collection?.reference_runtime_secs != null) {
-        const spanRef = document.createElement("span");
-        spanRef.textContent = "Reference: " + lb.collection.reference_runtime_secs.toFixed(3) + " s";
-        meta.appendChild(spanRef);
-      }
-
-      header.appendChild(title);
-      header.appendChild(meta);
-      card.appendChild(header);
-
-      const entries = Array.isArray(lb.entries) ? lb.entries.slice() : [];
-
-      const filtered = entries.filter(entry => {
-        const langs = extractLanguages(entry);
-        if (!activeLanguages.size) return false;
-        return langs.some(l => activeLanguages.has(l));
-      });
-
-      if (!filtered.length) {
-        const noData = document.createElement("div");
-        noData.className = "no-data";
-        noData.textContent = "No entries for the currently selected languages.";
-        card.appendChild(noData);
-        return card;
-      }
-
-      filtered.sort((a, b) => (a.min_runtime_secs ?? Infinity) - (b.min_runtime_secs ?? Infinity));
-
-      const tableWrapper = document.createElement("div");
-      tableWrapper.className = "table-wrapper";
-
-      const table = document.createElement("table");
-      const thead = document.createElement("thead");
-      const headerRow = document.createElement("tr");
-
-      ["#", "Name", "Languages", "Runtime (s)", "LOC", "LOC / language"].forEach(text => {
-        const th = document.createElement("th");
-        th.textContent = text;
-        headerRow.appendChild(th);
-      });
-      thead.appendChild(headerRow);
-      table.appendChild(thead);
-
-      const tbody = document.createElement("tbody");
-
-      filtered.forEach((entry, idx) => {
-        const tr = document.createElement("tr");
-
-        const tdRank = document.createElement("td");
-        tdRank.className = "rank";
-        tdRank.textContent = idx + 1;
-        tr.appendChild(tdRank);
-
-        const tdName = document.createElement("td");
-        tdName.className = "name";
-        const displayName = entry.alias && String(entry.alias).trim()
-          ? String(entry.alias)
-          : String(entry.source ?? "run " + entry.run_id);
-
-        tdName.textContent = displayName;
-
-        if (!entry.alias || !String(entry.alias).trim()) {
-          const src = document.createElement("span");
-          src.className = "source";
-          src.textContent = "[" + (entry.source ?? "id:" + entry.run_id) + "]";
-          tdName.appendChild(src);
-        }
-        tr.appendChild(tdName);
-
-        const tdLangs = document.createElement("td");
-        const langTagsContainer = document.createElement("div");
-        langTagsContainer.className = "lang-tags";
-
-        (entry.loc_by_language || []).forEach(pair => {
-            const lang = pair?.[0];
-            if (!lang) return;
-            const tag = document.createElement("span");
-            tag.className = "lang-tag";
-            tag.textContent = lang;
-            langTagsContainer.appendChild(tag);
-        });
-
-        tdLangs.appendChild(langTagsContainer);
-        tr.appendChild(tdLangs);
-
-        const tdRuntime = document.createElement("td");
-        tdRuntime.className = "runtime";
-        if (entry.min_runtime_secs != null) {
-          tdRuntime.textContent = entry.min_runtime_secs.toFixed(6);
-        } else {
-          tdRuntime.textContent = "—";
+                languageFilters.appendChild(label);
+            });
         }
 
-        if (lb.collection?.reference_runtime_secs != null && entry.min_runtime_secs != null) {
-          const ratio = entry.min_runtime_secs / lb.collection.reference_runtime_secs;
-            if (isFinite(ratio)) {
-            const badge = document.createElement("span");
-            badge.className = "badge";
-            const pct = ratio * 100;
+        function updateLanguageFilterUI() {
+            const chips = languageFilters.querySelectorAll(".language-chip");
+            chips.forEach(chip => {
+                const input = chip.querySelector("input[type='checkbox']");
+                const lang = input.value;
+                input.checked = activeLanguages.has(lang);
+                if (activeLanguages.has(lang)) {
+                    chip.classList.add("active");
+                } else {
+                    chip.classList.remove("active");
+                }
+            });
+        }
 
-            badge.textContent = pct.toFixed(1) + "% of reference time";
-            tdRuntime.appendChild(badge);
+        function onLanguageToggle(event) {
+            const lang = event.target.value;
+            if (event.target.checked) {
+                activeLanguages.add(lang);
+            } else {
+                activeLanguages.delete(lang);
             }
+            updateLanguageFilterUI();
+            renderCollections();
         }
 
-        tr.appendChild(tdRuntime);
+        function renderCollections() {
+            collectionsContainer.innerHTML = "";
+            collectionsTabs.innerHTML = "";
 
-        const tdLoc = document.createElement("td");
-        tdLoc.textContent = entry.loc != null ? String(entry.loc) : "—";
-        tr.appendChild(tdLoc);
+            if (!leaderboardData || !Array.isArray(leaderboardData.leaderboards) || !leaderboardData.leaderboards.length) {
+                placeholder.style.display = "block";
+                collectionsShell.style.display = "none";
+                return;
+            }
 
-        const tdLocPerLang = document.createElement("td");
-        const perLangText = (entry.loc_by_language || [])
-          .map(pair => pair?.[0] && pair?.[1] != null ? `${pair[0]}: ${pair[1]}` : null)
-          .filter(Boolean)
-          .join(", ");
-        tdLocPerLang.textContent = perLangText || "—";
-        tr.appendChild(tdLocPerLang);
+            placeholder.style.display = "none";
+            collectionsShell.style.display = "block";
 
-        tbody.appendChild(tr);
-      });
+            const leaderboards = leaderboardData.leaderboards;
+            const total = leaderboards.length;
 
-      table.appendChild(tbody);
-      tableWrapper.appendChild(table);
-      card.appendChild(tableWrapper);
+            // Ensure index bounds
+            if (currentCollectionIndex < 0) currentCollectionIndex = 0;
+            if (currentCollectionIndex >= total) currentCollectionIndex = total - 1;
 
-      return card;
-    }
+            // Tabs
+            leaderboards.forEach((lb, idx) => {
+                const tab = document.createElement("button");
+                tab.type = "button";
+                tab.className = "tab" + (idx === currentCollectionIndex ? " active" : "");
+                tab.textContent = lb.collection?.name || `Collection ${idx + 1}`;
+                tab.title = tab.textContent;
+                tab.addEventListener("click", () => {
+                    currentCollectionIndex = idx;
+                    renderCollections();
+                });
+                collectionsTabs.appendChild(tab);
+            });
 
-    function extractLanguages(entry) {
-      if (!entry || !Array.isArray(entry.loc_by_language)) return [];
-      return entry.loc_by_language
-        .map(pair => pair && pair[0])
-        .filter(Boolean);
-    }
-  </script>
+            // Pager
+            pagerInfo.textContent = (currentCollectionIndex + 1) + " / " + total;
+            btnPrev.disabled = currentCollectionIndex === 0;
+            btnNext.disabled = currentCollectionIndex === total - 1;
+
+            // Active collection card
+            const lb = leaderboards[currentCollectionIndex];
+            const card = buildCollectionCard(lb);
+            collectionsContainer.appendChild(card);
+        }
+
+        function buildCollectionCard(lb) {
+            const card = document.createElement("section");
+            card.className = "collection-card";
+
+            // Header
+            const header = document.createElement("div");
+            header.className = "collection-header";
+
+            const title = document.createElement("div");
+            title.className = "collection-title";
+            const nameSpan = document.createElement("span");
+            nameSpan.textContent = lb.collection?.name || "Unnamed collection";
+            const codeTag = document.createElement("code");
+            codeTag.textContent = lb.collection?.name || "collection";
+            title.appendChild(nameSpan);
+            title.appendChild(codeTag);
+
+            const meta = document.createElement("div");
+            meta.className = "collection-meta";
+            if (lb.collection?.length != null) {
+                const spanLen = document.createElement("span");
+                spanLen.textContent = "Cases: " + lb.collection.length;
+                meta.appendChild(spanLen);
+            }
+            if (lb.collection?.reference_runtime_secs != null) {
+                const spanRef = document.createElement("span");
+                spanRef.textContent = "Reference: " + lb.collection.reference_runtime_secs.toFixed(3) + " s";
+                meta.appendChild(spanRef);
+            }
+
+            header.appendChild(title);
+            header.appendChild(meta);
+            card.appendChild(header);
+
+            const entries = Array.isArray(lb.entries) ? lb.entries.slice() : [];
+            if (!entries.length) {
+                const noData = document.createElement("div");
+                noData.className = "no-data";
+                noData.textContent = "No entries in this collection.";
+                card.appendChild(noData);
+                return card;
+            }
+
+            // 1) Sort full collection by runtime (this defines absolute ordering)
+            const sorted = entries.slice().sort(
+                (a, b) => (a.min_runtime_secs ?? Infinity) - (b.min_runtime_secs ?? Infinity)
+            );
+
+            // 2) Precompute absolute & language-relative ranks on the full set
+            const rankMeta = new Map();            // entry -> { absRank, langRank }
+            const langRankCounters = new Map();    // primaryLang -> counter
+
+            sorted.forEach((entry, idx) => {
+                const absRank = idx + 1;
+
+                const languages = extractLanguages(entry);
+                const primaryLang = languages.length ? languages[0] : null;
+
+                let langRank = null;
+                if (primaryLang) {
+                    const prev = langRankCounters.get(primaryLang) || 0;
+                    langRank = prev + 1;
+                    langRankCounters.set(primaryLang, langRank);
+                }
+
+                rankMeta.set(entry, { absRank, langRank });
+            });
+
+            // 3) Apply language filter only to decide visibility (ranks remain the same)
+            const visible = sorted.filter(entry => {
+                const langs = extractLanguages(entry);
+                if (!activeLanguages.size) return false;          // no language selected => hide all
+                return langs.some(l => activeLanguages.has(l));
+            });
+
+            if (!visible.length) {
+                const noData = document.createElement("div");
+                noData.className = "no-data";
+                noData.textContent = "No entries for the currently selected languages.";
+                card.appendChild(noData);
+                return card;
+            }
+
+            // 4) Build the table using precomputed ranks
+            const tableWrapper = document.createElement("div");
+            tableWrapper.className = "table-wrapper";
+
+            const table = document.createElement("table");
+            const thead = document.createElement("thead");
+            const headerRow = document.createElement("tr");
+
+            // Abs. rank + language-relative rank + rest of columns
+            ["Abs. #", "Name", "Language", "Lang #",, "Runtime (s)", "LOC", "LOC / language"]
+            .forEach(text => {
+                    const th = document.createElement("th");
+                    th.textContent = text;
+                    headerRow.appendChild(th);
+                });
+
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+
+            const tbody = document.createElement("tbody");
+
+            visible.forEach(entry => {
+                const { absRank, langRank } = rankMeta.get(entry) || {};
+
+                const tr = document.createElement("tr");
+
+                // Absolute rank (independent of filter)
+                const tdAbsRank = document.createElement("td");
+                tdAbsRank.className = "rank";
+                tdAbsRank.textContent = absRank ?? "—";
+                tr.appendChild(tdAbsRank);
+
+                // Name (alias if set, always show source in brackets)
+                const tdName = document.createElement("td");
+                tdName.className = "name";
+                const nameText = entry.alias && String(entry.alias).trim()
+                    ? String(entry.alias)
+                    : String(entry.source);
+                tdName.textContent = nameText;
+
+                if (entry.source) {
+                    const src = document.createElement("span");
+                    src.className = "source";
+                    src.textContent = "[" + entry.source + "]";
+                    tdName.appendChild(src);
+                }
+                tr.appendChild(tdName);
+
+                // Languages (only language, no LOC)
+                const tdLangs = document.createElement("td");
+                const langTagsContainer = document.createElement("div");
+                langTagsContainer.className = "lang-tags";
+
+                (entry.loc_by_language || []).forEach(pair => {
+                    const lang = pair?.[0];
+                    if (!lang) return;
+                    const tag = document.createElement("span");
+                    tag.className = "lang-tag";
+                    tag.textContent = lang;
+                    langTagsContainer.appendChild(tag);
+                });
+
+                tdLangs.appendChild(langTagsContainer);
+                tr.appendChild(tdLangs);
+
+                
+                // Language-relative rank (also based on full collection, not filter)
+                const tdLangRank = document.createElement("td");
+                tdLangRank.className = "rank";
+                tdLangRank.textContent = langRank != null ? langRank : "—";
+                tr.appendChild(tdLangRank);
+
+                // Runtime + % of reference time badge
+                const tdRuntime = document.createElement("td");
+                tdRuntime.className = "runtime";
+                if (entry.min_runtime_secs != null) {
+                    tdRuntime.textContent = entry.min_runtime_secs.toFixed(6);
+                } else {
+                    tdRuntime.textContent = "—";
+                }
+
+                if (lb.collection?.reference_runtime_secs != null && entry.min_runtime_secs != null) {
+                    const ratio = entry.min_runtime_secs / lb.collection.reference_runtime_secs;
+                    if (isFinite(ratio)) {
+                        const badge = document.createElement("span");
+                        badge.className = "badge";
+                        const pct = ratio * 100;
+                        badge.textContent = pct.toFixed(1) + "% of reference time";
+                        tdRuntime.appendChild(badge);
+                    }
+                }
+
+                tr.appendChild(tdRuntime);
+
+                // LOC total
+                const tdLoc = document.createElement("td");
+                tdLoc.textContent = entry.loc != null ? String(entry.loc) : "—";
+                tr.appendChild(tdLoc);
+
+                // LOC per language detail
+                const tdLocPerLang = document.createElement("td");
+                const perLangText = (entry.loc_by_language || [])
+                    .map(pair => pair?.[0] && pair?.[1] != null ? `${pair[0]}: ${pair[1]}` : null)
+                    .filter(Boolean)
+                    .join(", ");
+                tdLocPerLang.textContent = perLangText || "—";
+                tr.appendChild(tdLocPerLang);
+
+                tbody.appendChild(tr);
+            });
+
+            table.appendChild(tbody);
+            tableWrapper.appendChild(table);
+            card.appendChild(tableWrapper);
+
+            return card;
+        }
+
+        function extractLanguages(entry) {
+            if (!entry || !Array.isArray(entry.loc_by_language)) return [];
+            return entry.loc_by_language
+                .map(pair => pair && pair[0])
+                .filter(Boolean);
+        }
+    </script>
 </body>
+
 </html>
