@@ -571,13 +571,72 @@
             }
         });
 
+        // --- New helpers for hash handling ------------------------------------
+
+        function slugifyCollectionName(name, fallback) {
+            const base = (name && String(name).trim().length)
+                ? String(name)
+                : fallback;
+            if (!base) return "";
+            return base
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, "-")
+                .replace(/^-+|-+$/g, "");
+        }
+
+        function findCollectionIndexFromHash() {
+            if (!leaderboardData || !Array.isArray(leaderboardData.leaderboards)) return null;
+            const hash = window.location.hash.replace(/^#/, "").trim();
+            if (!hash) return null;
+
+            const lbs = leaderboardData.leaderboards;
+            for (let i = 0; i < lbs.length; i++) {
+                const lb = lbs[i];
+                const slug = slugifyCollectionName(lb.collection?.name, `collection-${i + 1}`);
+                if (slug === hash) return i;
+            }
+            return null;
+        }
+
+        function updateHashForCurrentCollection(leaderboards) {
+            if (!leaderboards || !leaderboards.length) return;
+            const idx = currentCollectionIndex;
+            const lb = leaderboards[idx];
+            const slug = slugifyCollectionName(lb.collection?.name, `collection-${idx + 1}`);
+            if (!slug) return;
+
+            const newHash = "#" + slug;
+            // Avoid unnecessary history entries
+            if (window.location.hash !== newHash) {
+                window.location.hash = newHash;
+            }
+        }
+
+        // React to back/forward / manual hash changes
+        window.addEventListener("hashchange", () => {
+            if (!leaderboardData || !Array.isArray(leaderboardData.leaderboards)) return;
+            const idx = findCollectionIndexFromHash();
+            if (idx != null && idx !== currentCollectionIndex) {
+                currentCollectionIndex = idx;
+                renderCollections();
+            }
+        });
+
+        // -----------------------------------------------------------------------
+
         function loadLeaderboard() {
             fetch("assets/leaderboard.json")
                 .then(r => r.json())
                 .then(data => {
                     leaderboardData = data;
                     errorBox.style.display = "none";
+
+                    // Default to 0, but override with hash if we can match
                     currentCollectionIndex = 0;
+                    const idxFromHash = findCollectionIndexFromHash();
+                    if (idxFromHash != null) {
+                        currentCollectionIndex = idxFromHash;
+                    }
 
                     prepareMetaInfo(data);
                     prepareLanguages(data);
@@ -589,10 +648,11 @@
                     showError("Could not load leaderboard data.");
                 });
         }
-        
+
         window.addEventListener("DOMContentLoaded", loadLeaderboard);
 
-        setInterval(loadLeaderboard, 5 * 60 * 1000);  // reload every 5 min
+        // reload every 5 min (preserves selected collection via hash)
+        setInterval(loadLeaderboard, 5 * 60 * 1000);
 
         function showError(message) {
             errorBox.textContent = message;
@@ -733,6 +793,9 @@
             if (currentCollectionIndex < 0) currentCollectionIndex = 0;
             if (currentCollectionIndex >= total) currentCollectionIndex = total - 1;
 
+            // Keep hash in sync with the currently rendered collection
+            updateHashForCurrentCollection(leaderboards);
+
             // Tabs
             leaderboards.forEach((lb, idx) => {
                 const tab = document.createElement("button");
@@ -849,9 +912,8 @@
             const thead = document.createElement("thead");
             const headerRow = document.createElement("tr");
 
-            // Abs. rank + language-relative rank + rest of columns
-            ["Abs. #", "Name", "Language", "Lang #",, "Runtime (s)", "LOC", "LOC / language", "Code Labels"]
-            .forEach(text => {
+            ["Abs. #", "Name", "Language", "Lang #", "Runtime (s)", "LOC", "LOC / language", "Code Labels"]
+                .forEach(text => {
                     const th = document.createElement("th");
                     th.textContent = text;
                     headerRow.appendChild(th);
@@ -906,7 +968,6 @@
                 tdLangs.appendChild(langTagsContainer);
                 tr.appendChild(tdLangs);
 
-                
                 // Language-relative rank (also based on full collection, not filter)
                 const tdLangRank = document.createElement("td");
                 tdLangRank.className = "rank";
