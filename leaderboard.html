@@ -864,6 +864,11 @@
                 return card;
             }
 
+            // Check if any entry in this collection has non-empty code_labels
+            const hasCodeLabels = entries.some(
+                entry => Array.isArray(entry.code_labels) && entry.code_labels.length > 0
+            );
+
             // 1) Sort full collection by runtime (this defines absolute ordering)
             const sorted = entries.slice().sort(
                 (a, b) => (a.min_runtime_secs ?? Infinity) - (b.min_runtime_secs ?? Infinity)
@@ -912,12 +917,16 @@
             const thead = document.createElement("thead");
             const headerRow = document.createElement("tr");
 
-            ["Abs. #", "Name", "Language", "Lang #", "Runtime (s)", "LOC", "LOC / language", "Code Labels"]
-                .forEach(text => {
-                    const th = document.createElement("th");
-                    th.textContent = text;
-                    headerRow.appendChild(th);
-                });
+            const columns = ["Abs. #", "Name", "Language", "Lang #", "Runtime (s)", "LOC", "LOC / language"];
+            if (hasCodeLabels) {
+                columns.push("Code Labels");
+            }
+
+            columns.forEach(text => {
+                const th = document.createElement("th");
+                th.textContent = text;
+                headerRow.appendChild(th);
+            });
 
             thead.appendChild(headerRow);
             table.appendChild(thead);
@@ -1010,19 +1019,21 @@
                 tdLocPerLang.textContent = perLangText || "—";
                 tr.appendChild(tdLocPerLang);
 
-                // Code Labels
-                const tdLabels = document.createElement("td");
+                // Code Labels (only if at least one entry in the collection has them)
+                if (hasCodeLabels) {
+                    const tdLabels = document.createElement("td");
 
-                const langCodeLabelContainer = document.createElement("div");
-                langCodeLabelContainer.className = "lang-tags";
+                    const langCodeLabelContainer = document.createElement("div");
+                    langCodeLabelContainer.className = "lang-tags";
 
-                (entry.code_labels || []).forEach(label => {
-                    if (!label) return;
-                    const tag = document.createElement("span");
-                    tag.className = "lang-tag";
-                    tag.textContent = label;
-                    langCodeLabelContainer.appendChild(tag);
-                });
+                    (entry.code_labels || []).forEach(label => {
+                        if (!label) return;
+                        const tag = document.createElement("span");
+                        tag.className = "lang-tag";
+                        tag.textContent = label;
+                        langCodeLabelContainer.appendChild(tag);
+                    });
+                }
 
                 tdLabels.appendChild(langCodeLabelContainer);
                 tr.appendChild(tdLabels);
